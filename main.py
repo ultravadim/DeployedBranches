@@ -14,7 +14,7 @@ def get_last_deploy_on_stand_for_project(project_id: int = 190, stand_name: str 
 
     response = s.get(url_request, headers=TOKEN).json()
 
-    return response[0]
+    return response[0] if response else {}
 
 
 def get_last_deploy_on_stand_for_all_projects(stand_name: str = 'qa3') -> str:
@@ -24,16 +24,20 @@ def get_last_deploy_on_stand_for_all_projects(stand_name: str = 'qa3') -> str:
     for project_name, project_id in PROJECTS_ID.items():
         last_branch = get_last_deploy_on_stand_for_project(project_id, stand_name)
 
-        branch_name = last_branch["deployable"]["ref"]
-        finish_time = datetime.strptime(last_branch["deployable"]["finished_at"],
-                                        FORMAT_DATE_FROM).strftime(FORMAT_DATE_TO)
-        user_deploy = last_branch["deployable"]["user"]["name"]
+        try:
+            branch_name = last_branch["deployable"]["ref"]
+            finish_time = datetime.strptime(last_branch["deployable"]["finished_at"],
+                                            FORMAT_DATE_FROM).strftime(FORMAT_DATE_TO)
+            user_deploy = last_branch["deployable"]["user"]["name"]
 
-        message += f'{project_name:<12} | {branch_name:<10} | {user_deploy:<17} | {finish_time}\n'
+            message += f'{project_name:<12} | {branch_name:<10} | {user_deploy:<17} | {finish_time}\n'
+        except KeyError:
+            message += f'{project_name:<12} | {"-":<10} | {"-":<17} | -\n'
 
     return message
 
 
-STAND_NAME = 'test1'
+STAND_NAME = 'test4'
 
-print(get_last_deploy_on_stand_for_all_projects(STAND_NAME))
+if __name__ == "__main__":
+    print(get_last_deploy_on_stand_for_all_projects(STAND_NAME))
