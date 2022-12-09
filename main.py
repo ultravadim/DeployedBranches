@@ -12,9 +12,14 @@ def get_last_deploy_on_stand_for_project(project_id: int = 190, stand_name: str 
 
     url_request = f'{URL_GITLAB}/api/v4/projects/{project_id}/deployments?environment={stand_name}&status=success&sort=desc'
 
-    response = s.get(url_request, headers=TOKEN).json()
+    response = s.get(url_request, headers=TOKEN)
 
-    return response[0] if response else {}
+    if response.status_code != 200:
+        raise SystemExit(f'Server response {response.status_code}: {response.json()}')
+
+    data = response.json()
+
+    return data[0] if data else {}
 
 
 def get_last_deploy_on_stand_for_all_projects(stand_name: str = 'qa3') -> str:
